@@ -2,7 +2,6 @@ package utils;
 
 import com.microsoft.azure.batch.BatchClient;
 import com.microsoft.azure.batch.auth.BatchApplicationTokenCredentials;
-import com.microsoft.azure.batch.auth.BatchUserTokenCredentials;
 import com.microsoft.azure.batch.protocol.models.*;
 
 import java.io.IOException;
