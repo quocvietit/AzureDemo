@@ -1,6 +1,8 @@
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.CloudBlobDirectory;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import utils.AzureBlobUtil;
 
 import java.io.File;
@@ -85,26 +87,35 @@ public class Application {
 //		//--------------Storage-----------------
 		String connectionString = System.getenv("CONNECTION_STRING");
 		String containerName = "cic-charts";
-		String directory = "";
+		String directory = "ahihi";
 		String blobName1 = "file1.txt";
 		String blobName2 = "file2.txt";
-		File file = new File("./src/main/resources/DAAE 16-1.tcl");
+		File file = new File("./src/main/resources/a.txt");
 		//File file1 = new File("./src/main/resources/test1.txt");
 		Map<String, String> metadata = new HashMap<String, String>();
 		metadata.put("key1", "value1");
 
 		AzureBlobUtil azureBlobUtil = new AzureBlobUtil();
 		CloudBlobClient cloudBlobClient = azureBlobUtil.createBlobClient(connectionString);
-		CloudBlobContainer cloudBlobContainer =azureBlobUtil.createContainer(cloudBlobClient, containerName);
+		CloudBlobContainer cloudBlobContainer = azureBlobUtil.createContainer(cloudBlobClient, containerName);
 
 
 		byte[] content = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
 
-		azureBlobUtil.uploadFile(cloudBlobContainer, blobName1, directory,file, metadata);
+		azureBlobUtil.uploadFile(cloudBlobContainer, blobName1, directory, file, metadata);
 		URI uri = azureBlobUtil.uploadContent(cloudBlobContainer, blobName2, directory, content, metadata);
 		System.out.println(uri.toString());
 
 		azureBlobUtil.downloadFile(cloudBlobContainer, blobName2, directory, "file.txt");
 
+		CloudBlobDirectory cloudBlobDirectory = cloudBlobContainer.getDirectoryReference(directory);
+		CloudBlockBlob cloudBlockBlob = cloudBlobContainer.getBlockBlobReference(directory);
+		if (cloudBlockBlob.deleteIfExists()) {
+			System.out.println("Delete");
+		}else{
+			System.out.println("Error");
+		}
+
+		azureBlobUtil.deleteBlobDirectory(cloudBlobContainer, directory);
 	}
 }

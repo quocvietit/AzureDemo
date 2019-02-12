@@ -2,10 +2,7 @@ package utils;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlobDirectory;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import com.microsoft.azure.storage.blob.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +19,10 @@ public class AzureBlobUtil {
 
 		return cloudBlobClient;
 	}
+
+//	public CloudBlobClient creaCloudBlobClient(String storageAccountName, String storageAccountKey){
+//		CloudStorageAccount cloudStorageAccount = CloudStorageAccount.
+//	}
 
 	public CloudBlobContainer createContainer(CloudBlobClient cloudBlobClient, String containerName) throws URISyntaxException, StorageException {
 		CloudBlobContainer cloudBlobContainer = cloudBlobClient.getContainerReference(containerName);
@@ -71,6 +72,24 @@ public class AzureBlobUtil {
 
 		cloudBlockBlob.downloadToFile(pathFile);
 		return true;
+	}
+
+	public void deleteBlobDirectory(CloudBlobContainer cloudBlobContainer, String directoryName) throws URISyntaxException, StorageException {
+		CloudBlobDirectory cloudBlobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
+		String directoryUri = cloudBlobDirectory.getUri().toString();
+
+		Iterable<ListBlobItem> blobs = cloudBlobDirectory.listBlobs();
+		for (ListBlobItem blobItem : blobs) {
+			String blobBlockUri = blobItem.getUri().toString();
+			String blobBlock = blobBlockUri.replace(directoryUri, "");
+
+			CloudBlockBlob cloudBlockBlob = cloudBlobDirectory.getBlockBlobReference(blobBlock);
+			System.out.println(cloudBlockBlob.getUri());
+			if (!cloudBlockBlob.deleteIfExists()){
+				String directory = directoryName.concat("/").concat(blobBlock);
+				deleteBlobDirectory(cloudBlobContainer, directory);
+			}
+		}
 	}
 
 }
